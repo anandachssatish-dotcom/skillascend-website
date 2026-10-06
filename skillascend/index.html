@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillAscend</title>
+<link rel="stylesheet" href="sastyle.css">
+</head>
+<body>
+
+<div id="authPage" class="auth-page">
+  <div class="auth-card">
+    <div class="logo"><div class="logo-icon">↗</div><div>Skill<span>Ascend</span></div></div>
+    <h1 id="authTitle">Welcome Back 👋</h1>
+    <p id="authSubtitle">Login to continue your career journey.</p>
+
+    <div id="nameField" class="input-group hidden">
+      <label>Full Name</label>
+      <input type="text" id="nameInput" placeholder="Enter your full name">
+    </div>
+    <div class="input-group">
+      <label>Email</label>
+      <input type="email" id="emailInput" placeholder="Enter your email">
+    </div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="passwordInput" placeholder="Enter your password">
+    </div>
+
+    <button class="main-button" onclick="handleAuth()" id="authButton">Login</button>
+    <div class="divider"><span>OR</span></div>
+    <button class="google-button" onclick="googleLogin()"><span class="google-icon">G</span> Continue with Google</button>
+
+    <p class="switch-auth">
+      <span id="switchText">Don't have an account?</span>
+      <button onclick="toggleAuth()" id="switchButton">Create Account</button>
+    </p>
+    <p class="demo-note">Demo version — account data is stored in this browser.</p>
+  </div>
+</div>
+
+<div id="mainApp" class="hidden">
+  <header class="topbar">
+    <div class="brand"><div class="logo-icon">↗</div><div>Skill<span>Ascend</span></div></div>
+    <div class="user-area"><div id="topUserName">User</div><div class="avatar" id="topAvatar">U</div></div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <button class="nav-button active" onclick="showPage('dashboard', this)">🏠 Dashboard</button>
+      <button class="nav-button" onclick="showPage('courses', this)">📚 Courses</button>
+      <button class="nav-button" onclick="showPage('cv', this)">📄 CV Builder</button>
+      <button class="nav-button" onclick="showPage('gaps', this)">🎯 Skill Gaps</button>
+      <button class="nav-button" onclick="showPage('verification', this)">🛡️ Verify Skills</button>
+      <button class="nav-button" onclick="showPage('jobs', this)">💼 Jobs</button>
+      <button class="nav-button" onclick="showPage('government', this)">🏛️ Government Jobs</button>
+      <button class="nav-button" onclick="showPage('profile', this)">👤 Profile</button>
+      <button class="nav-button" onclick="showPage('settings', this)">⚙️ Settings</button>
+      <div class="sidebar-bottom"><button class="nav-button logout" onclick="logout()">🚪 Logout</button></div>
+    </aside>
+
+    <main class="content">
+
+      <section id="dashboard" class="page">
+        <div class="hero">
+          <div>
+            <h1>Hello, <span id="welcomeName">User</span> 👋</h1>
+            <p>Keep learning, build your skills, and move closer to your career goal.</p>
+          </div>
+          <button class="success-button" onclick="openPage('jobs')">Find Opportunities</button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card"><p>Overall Progress</p><h2 id="ovScore">0%</h2>
+            <div class="progress"><div class="progress-fill" id="ovBar" style="width:0%"></div></div></div>
+          <div class="stat-card"><p>Learning</p><h2 id="lrScore">0%</h2><span class="badge green" id="lrBadge">Not started</span></div>
+          <div class="stat-card"><p>CV Completion</p><h2 id="cvScore">0%</h2><span class="badge blue" id="cvBadge">Not started</span></div>
+          <div class="stat-card"><p>Skills Verified</p><h2 id="vfScore">0%</h2><span class="badge orange" id="vfBadge">Not started</span></div>
+          <div class="stat-card"><p>Trust Score</p><h2 id="trScore">100</h2><span class="badge green" id="trBadge">Trusted</span></div>
+        </div>
+
+        <h2 class="section-heading">Quick Actions</h2>
+        <div class="card-grid">
+          <div class="feature-card"><div class="feature-icon blue-icon">📄</div><h3>Build CV</h3>
+            <p>Create your professional CV with voice and AI.</p>
+            <button class="main-button" onclick="openPage('cv')">Build CV</button></div>
+          <div class="feature-card"><div class="feature-icon green-icon">🛡️</div><h3>Verify Skills</h3>
+            <p>Prove your practical skills.</p>
+            <button class="main-button" onclick="openPage('verification')">Verify</button></div>
+          <div class="feature-card"><div class="feature-icon green-icon">💼</div><h3>Find Jobs</h3>
+            <p>Find suitable opportunities.</p>
+            <button class="success-button" onclick="openPage('jobs')">Find Jobs</button></div>
+          <div class="feature-card"><div class="feature-icon blue-icon">🏛️</div><h3>Government Exams</h3>
+            <p>See every exam you are eligible for.</p>
+            <button class="main-button" onclick="openPage('government')">Check Eligibility</button></div>
+        </div>
+
+        <h2 class="section-heading">Your Career Journey</h2>
+        <div class="journey-card">
+          <div class="journey-step"><span>📚</span><strong>Learn</strong></div><div class="arrow">→</div>
+          <div class="journey-step"><span>🛠️</span><strong>Build</strong></div><div class="arrow">→</div>
+          <div class="journey-step"><span>🛡️</span><strong>Verify</strong></div><div class="arrow">→</div>
+          <div class="journey-step"><span>💼</span><strong>Get Employed</strong></div>
+        </div>
+      </section>
+
+      <section id="courses" class="page hidden">
+        <h1>Courses 📚</h1>
+        <p class="subtitle">Free YouTube tutorials. Missing skills for your career goal are shown first.</p>
+        <input class="search-box" type="text" placeholder="Search courses..." onkeyup="renderCourses()" id="courseSearch">
+        <div class="course-grid" id="courseList"></div>
+      </section>
+
+      <section id="cv" class="page hidden">
+        <div class="page-header">
+          <div>
+            <h1>CV Builder 📄</h1>
+            <p class="subtitle">Fill the form or speak. Your CV preview updates on the right.</p>
+          </div>
+          <button class="main-button" onclick="window.print()">Download / Print CV</button>
+        </div>
+
+        <div class="cv-layout">
+          <div class="form-card">
+            <h2>Personal Information</h2>
+            <div class="input-group"><label>Name</label><input id="cvName" type="text"></div>
+            <div class="two">
+              <div class="input-group"><label>Email</label><input id="cvEmail" type="email"></div>
+              <div class="input-group"><label>Phone</label><input id="cvPhone" type="tel" placeholder="+91 ..."></div>
+            </div>
+            <div class="two">
+              <div class="input-group"><label>Location</label><input id="cvLocation" placeholder="City, State"></div>
+              <div class="input-group"><label>LinkedIn / Portfolio</label><input id="cvLink" placeholder="Link (optional)"></div>
+            </div>
+
+            <div class="input-group">
+              <label>Career Goal (AI will verify this job)</label>
+              <input id="careerGoal" type="text" placeholder="Example: Frontend Developer">
+              <div id="goalStatus" class="goal-status"></div>
+            </div>
+            <div class="input-group">
+              <label>Professional Summary</label>
+              <textarea id="cvSummary" rows="3" placeholder="2-3 lines about you. Or use the AI assistant below."></textarea>
+            </div>
+            <div class="input-group"><label>Skills</label>
+              <input id="cvSkills" type="text" placeholder="Separated by commas"></div>
+            <div class="input-group"><label>Education (one per line: Degree | Institute | Year)</label>
+              <textarea id="cvEducation" rows="3" placeholder="B.Com | Goa University | 2024"></textarea></div>
+            <div class="input-group"><label>Experience (one per line: Role | Place | Duration)</label>
+              <textarea id="cvExperience" rows="3" placeholder="Intern | Pixel Studio | 3 months"></textarea></div>
+            <div class="input-group"><label>Projects (one per line)</label>
+              <textarea id="cvProjects" rows="3" placeholder="To-do app using JavaScript"></textarea></div>
+            <div class="input-group"><label>Certifications (one per line)</label>
+              <textarea id="cvCerts" rows="2"></textarea></div>
+            <div class="two">
+              <div class="input-group"><label>Languages (commas)</label><input id="cvLanguages" placeholder="English, Hindi, Konkani"></div>
+              <div class="input-group"><label>Hobbies (commas)</label><input id="cvHobbies" placeholder="Cricket, Reading"></div>
+            </div>
+
+            <div class="cv-actions">
+              <button class="main-button" onclick="updateCV()">Update CV</button>
+              <button class="outline-button" onclick="clearCV()">Clear CV</button>
+              <button class="outline-button" onclick="updateCV(true)">Verify Goal &amp; Find Skill Gap</button>
+            </div>
+          </div>
+
+          <div class="cv-preview">
+            <div class="cv-header">
+              <h1 id="previewName">User</h1>
+              <p id="previewContact">email@example.com</p>
+            </div>
+            <div class="cv-section"><h3>Professional Summary</h3><p id="previewGoal"></p></div>
+            <div class="cv-section"><h3>Skills</h3><div id="previewSkills"></div></div>
+            <div id="previewSections"></div>
+          </div>
+        </div>
+
+        <div class="ai-card">
+          <h2>🤖 AI CV Assistant</h2>
+          <p>Speak (or type) about your studies, work, skills and hobbies. AI cleans the speech and fills your CV. Hindi and Marathi speech is translated to English.</p>
+          <div class="voice-area">
+            <select id="voiceLang">
+              <option value="en-IN">English (India)</option>
+              <option value="hi-IN">Hindi</option>
+              <option value="mr-IN">Marathi</option>
+            </select>
+            <button class="main-button" id="voiceButton" onclick="startVoice()">🎙️ Speak</button>
+            <button class="success-button" onclick="improveCVWithAI()">✨ Improve CV with AI</button>
+          </div>
+          <div class="status-line"><span id="voiceStatus">Voice input ready</span> <span id="aiStatus"></span></div>
+          <textarea id="voiceText" rows="4" placeholder="Example: I finished B.Com from Goa University in 2024. I know Excel and Tally. I like cricket..."></textarea>
+        </div>
+        <div id="gapResult"></div>
+      </section>
+
+      <section id="gaps" class="page hidden">
+        <h1>Skill Gaps 🎯</h1>
+        <p class="subtitle">Skills you still need, with a beginner-friendly YouTube teacher for each.</p>
+        <div class="actions"><button class="main-button" onclick="downloadGap()">⬇ Download Report</button>
+        <button class="outline-button" onclick="renderGaps()">Refresh</button></div>
+        <div id="gapPage" style="margin-top:15px"></div>
+      </section>
+
+      <section id="verification" class="page hidden">
+        <h1>Skill Verification 🛡️</h1>
+        <p class="subtitle">Prove your skills through practical questions.</p>
+        <div id="trustBar" class="trust-bar"></div>
+        <div class="card-grid" id="verifyList"></div>
+      </section>
+
+      <section id="jobs" class="page hidden">
+        <h1>Jobs 💼</h1>
+        <p class="subtitle" id="jobLocationText">Jobs matched to your CV location.</p>
+        <div class="job-count" id="jobCount">0 jobs found</div>
+        <input class="search-box" id="jobSearch" placeholder="Search jobs..." onkeyup="renderJobs()">
+        <div class="job-list" id="jobList"></div>
+      </section>
+
+      <section id="government" class="page hidden">
+        <h1>Government Jobs 🏛️</h1>
+        <p class="subtitle">Check which government exams are eligible based on the demo rules below.</p>
+        <div class="form-grid">
+          <div class="form-card"><label>Qualification</label>
+            <select id="qualification" onchange="renderGov()">
+              <option>Graduation</option><option>12th</option><option>10th</option>
+            </select></div>
+          <div class="form-card"><label>Age</label>
+            <input id="age" type="number" value="22" min="14" max="60" onchange="renderGov()"></div>
+          <div class="form-card"><label>Category</label>
+            <select id="category" onchange="renderGov()">
+              <option>General</option><option>OBC</option><option>SC</option><option>ST</option>
+            </select></div>
+        </div>
+        <button class="success-button" onclick="renderGov()">Show Eligible Exams</button>
+        <div class="exam-card">
+          <h2 id="examCount">Eligible Exams</h2>
+          <div id="examList"></div>
+          <p class="demo-note">Demo eligibility only. Always confirm the official notification before applying.</p>
+        </div>
+      </section>
+
+      <section id="profile" class="page hidden">
+        <h1>Profile 👤</h1>
+        <p class="subtitle">Manage your SkillAscend profile.</p>
+        <div class="profile-card">
+          <div class="large-avatar" id="profileAvatar">U</div>
+          <div class="profile-info"><h2 id="profileName">User</h2><p id="profileEmail">email@example.com</p></div>
+        </div>
+        <div class="form-card profile-form">
+          <div class="input-group"><label>Full Name</label><input id="profileNameInput"></div>
+          <div class="input-group"><label>Email</label><input id="profileEmailInput" disabled></div>
+          <div class="input-group"><label>Skills</label><input id="profileSkills" placeholder="Separated by commas"></div>
+          <button class="main-button" onclick="saveProfile()">Save Changes</button>
+        </div>
+      </section>
+
+      <section id="settings" class="page hidden">
+        <h1>Settings ⚙️</h1>
+        <div class="settings-card">
+          <h2>Account</h2>
+          <p id="settingsEmail">email@example.com</p>
+          <button class="outline-button" onclick="logout()">Logout</button>
+        </div>
+        <div class="settings-card">
+          <h2>Integrations 🚀</h2>
+          <ul>
+            <li>Demo authentication and profile storage are local-browser based.</li>
+            <li>AI CV, skill-gap and quiz features use your local Node server.</li>
+            <li>Live jobs and government notifications are future integrations.</li>
+            <li>Employer verification and secure production authentication require a backend.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="message" class="message hidden"></div>
+<script src="skillascend.js"></script>
+</body>
+</html>
