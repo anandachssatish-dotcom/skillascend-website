@@ -57,6 +57,65 @@ const GOV_EXAMS = [
   {name:"Railway NTPC",min:"12th",minAge:18,maxAge:33,desc:"Railway recruitment; exact eligibility varies by notification."}
 ];
 
+const GOV_NOTE = "General pattern only. Sections, marks and syllabus can change, so always check the official notification.";
+const SSC_QUANT = ["Number system","Percentage","Ratio & proportion","Average","Profit & loss","Simple & compound interest","Time & work","Time, speed & distance","Algebra","Geometry","Mensuration","Trigonometry","Data interpretation"];
+const SSC_REASON = ["Analogy","Classification (odd one out)","Number & letter series","Coding-decoding","Blood relations","Direction sense","Syllogism","Venn diagrams","Puzzles & seating","Non-verbal reasoning (figures, paper folding)"];
+const SSC_ENGLISH = ["Reading comprehension","Cloze test","Error spotting","Sentence improvement","Synonyms & antonyms","One-word substitution","Idioms & phrases","Para jumbles","Active/passive & direct/indirect speech"];
+const SSC_GA = ["History","Geography","Indian polity","Economy basics","General science","Static GK","Current affairs","Awards, books & sports"];
+const GOV_SYLLABUS = {
+  "SSC CGL":{pattern:"Tier I (computer-based, 4 sections). Higher tiers add advanced maths, English and other papers depending on the post.",subjects:[
+    {name:"Quantitative Aptitude",weight:3,topics:SSC_QUANT},
+    {name:"General Intelligence & Reasoning",weight:2,topics:SSC_REASON},
+    {name:"English Comprehension",weight:2,topics:SSC_ENGLISH},
+    {name:"General Awareness",weight:2,topics:SSC_GA}]},
+  "SSC CHSL":{pattern:"Tier I (computer-based, 4 sections). A later skill or typing test applies for some posts.",subjects:[
+    {name:"Quantitative Aptitude",weight:2,topics:["Number system","Percentage","Ratio & proportion","Average","Profit & loss","Simple interest","Time & work","Time, speed & distance","Basic algebra","Basic geometry & mensuration","Data interpretation"]},
+    {name:"General Intelligence & Reasoning",weight:2,topics:SSC_REASON},
+    {name:"English Language",weight:2,topics:SSC_ENGLISH},
+    {name:"General Awareness",weight:2,topics:SSC_GA}]},
+  "SSC MTS":{pattern:"Computer-based exam with maths/reasoning and awareness/English sections.",subjects:[
+    {name:"Numerical & Mathematical Ability",weight:2,topics:["Number system & BODMAS","Fractions & decimals","Percentage","Ratio & proportion","Average","Profit & loss","Simple interest","Time & work","Basic mensuration"]},
+    {name:"Reasoning Ability",weight:2,topics:["Analogy","Odd one out","Series","Coding-decoding","Direction sense","Blood relations","Simple puzzles","Non-verbal reasoning"]},
+    {name:"General Awareness",weight:2,topics:SSC_GA},
+    {name:"English Language",weight:1,topics:["Vocabulary","Basic grammar","Spelling & error spotting","Fill in the blanks","Comprehension passage"]}]},
+  "Bank PO":{pattern:"Prelims (English, Quant, Reasoning), then Mains (more sections and a descriptive English test), then Interview.",subjects:[
+    {name:"Quantitative Aptitude",weight:3,topics:["Simplification & approximation","Number series","Quadratic equations","Arithmetic (percentage, ratio, interest, time & work)","Data sufficiency","Mensuration"]},
+    {name:"Reasoning & Computer Aptitude",weight:3,topics:["Puzzles & seating arrangement","Syllogism","Inequalities","Blood relations & direction","Input-output","Coding-decoding","Computer basics (hardware, software, networks, MS Office)"]},
+    {name:"English Language",weight:2,topics:["Reading comprehension","Cloze test","Error spotting","Para jumbles","Fill in the blanks","Descriptive writing (letter & essay)"]},
+    {name:"Banking & Economy Awareness",weight:2,topics:["Banking terms & RBI functions","Financial institutions","Government schemes","Budget & economy basics","Current affairs"]},
+    {name:"Data Analysis & Interpretation",weight:2,topics:["Tables & bar graphs","Line & pie charts","Caselet DI","Missing DI","Data sufficiency"]}]},
+  "Railway NTPC":{pattern:"Computer-based test (CBT 1 and CBT 2). Some posts also need a typing or aptitude test.",subjects:[
+    {name:"Mathematics",weight:2,topics:["Number system","Percentage","Ratio & proportion","Average","Profit & loss","Simple & compound interest","Time & work","Time, speed & distance","Geometry & mensuration","Algebra & trigonometry basics"]},
+    {name:"General Intelligence & Reasoning",weight:2,topics:["Analogy","Series","Coding-decoding","Blood relations","Direction sense","Syllogism","Venn diagrams","Puzzles","Statement & conclusion"]},
+    {name:"General Awareness",weight:3,topics:["Current affairs","Indian history","Geography","Indian polity & constitution","Economy basics","Physics basics","Chemistry basics","Biology basics","Computers & Railways GK"]}]}
+};
+
+const SSC_APPLY = {
+  links:[{label:"SSC official website (register and apply)",url:"https://ssc.gov.in"}],
+  centreMode:"choose",
+  centreNote:"In the application form you choose 3 exam centres in order of preference. Choose carefully, because changing a centre later is usually not allowed.",
+  steps:["Complete One-Time Registration (OTR) on the SSC website. It is needed for every SSC exam.","Log in with your registration ID and password.","When the notification is open, click Apply and select this exam.","Fill your details and choose 3 exam centres in order of preference.","Upload your photo and signature, pay the fee (if it applies to your category) and submit.","Save the confirmation page or PDF."],
+  docs:["Photo and signature (scanned, in the size shown on the form)","Valid ID proof (Aadhaar or other)","Mark sheets and certificates of your qualification","Category certificate, if you claim a category benefit","Mobile number and email you can access for OTP"]
+};
+const GOV_APPLY = {
+  "SSC CGL":SSC_APPLY, "SSC CHSL":SSC_APPLY, "SSC MTS":SSC_APPLY,
+  "Bank PO":{
+    links:[{label:"IBPS official website (PO/MT)",url:"https://www.ibps.in"},{label:"SBI careers (SBI PO)",url:"https://sbi.co.in/web/careers"}],
+    centreMode:"choose",
+    centreNote:"IBPS asks for your preferred exam centre (state and city) in the form, usually for Prelims and Mains. SBI PO is a separate recruitment with its own form.",
+    steps:["Open the official website of the bank or IBPS and go to the current recruitment notice.","Register with your email and mobile number, then log in.","Fill your details and select your preferred exam centre.","Upload photo, signature and the other documents the notice asks for.","Pay the fee online and submit.","Save the confirmation page."],
+    docs:["Photo and signature (scanned)","Valid ID proof (Aadhaar or other)","Graduation certificate or marks","Category certificate, if you claim a category benefit","Any extra upload the notice asks for (for example thumb impression or handwritten declaration)"]
+  },
+  "Railway NTPC":{
+    links:[{label:"RRB application portal",url:"https://www.rrbapply.gov.in"}],
+    centreMode:"allotted",
+    centreNote:"You usually apply to ONE RRB only, and applying to more than one can get all your forms rejected. The board allots your exam city, and it is shown on the RRB website shortly before the exam. Changing the centre is normally not allowed.",
+    steps:["Open the RRB application portal and create an account (or log in if you already have one).","Choose ONE RRB and your post preferences.","Fill your details and upload photo and signature.","Pay the fee online and submit.","Save the confirmation page.","Check your exam city and admit card on the RRB website before the exam."],
+    docs:["Photo and signature (scanned)","Valid ID proof (Aadhaar or other)","Qualification certificates and mark sheets","Category certificate, if you claim a category benefit","Mobile number and email you can access for OTP"]
+  }
+};
+const CITY_LIST = ["Panaji","Margao","Mapusa","Vasco da Gama","Mumbai","Pune","Nagpur","Nashik","Kolhapur","Belagavi","Hubballi","Bengaluru","Mangaluru","Hyderabad","Chennai","Kochi","Thiruvananthapuram","Delhi","Lucknow","Patna","Kolkata","Bhopal","Indore","Ahmedabad","Jaipur","Chandigarh"];
+
 function showMessage(msg) {
   const el = $("message");
   el.textContent = msg;
@@ -363,8 +422,169 @@ function renderGov() {
   $("examCount").textContent = `${eligible.length} Eligible Exam${eligible.length === 1 ? "" : "s"}`;
   $("examList").innerHTML = GOV_EXAMS.map(e => {
     const ok = rank >= {"10th":1,"12th":2,"Graduation":3}[e.min] && age >= e.minAge && age <= e.maxAge;
-    return `<div class="exam-row ${ok ? "" : "no"}"><div><h3>${esc(e.name)}</h3><p>${esc(e.desc)} Required: ${esc(e.min)} · Typical age: ${e.minAge}-${e.maxAge}</p></div><div class="exam-right"><span class="badge ${ok?"green":"red"}">${ok?"Eligible":"Not eligible"}</span></div></div>`;
+    return `<div class="exam-row ${ok ? "" : "no"}"><div><h3>${esc(e.name)}</h3><p>${esc(e.desc)} Required: ${esc(e.min)} · Typical age: ${e.minAge}-${e.maxAge}</p></div><div class="exam-right"><span class="badge ${ok?"green":"red"}">${ok?"Eligible":"Not eligible"}</span>${ok&&currentUser?.examApplied?.[e.name]?'<span class="badge blue">✓ Applied</span>':""}${ok&&GOV_SYLLABUS[e.name]?`<button class="outline-button" onclick="openSyllabus('${encodeURIComponent(e.name)}')">📖 Syllabus</button><button class="main-button" onclick="openStudyPlan('${encodeURIComponent(e.name)}')">🗓️ Study Plan</button>`:""}${ok&&GOV_APPLY[e.name]?`<button class="success-button" onclick="openApply('${encodeURIComponent(e.name)}')">📝 Apply</button>`:""}</div></div>`;
   }).join("");
+}
+
+
+function openGovModal(html) {
+  closeGovModal();
+  const d = document.createElement("div");
+  d.className = "qz-modal"; d.id = "govModal";
+  d.innerHTML = `<div class="qz-box">${html}</div>`;
+  d.addEventListener("click", e => { if (e.target === d) closeGovModal(); });
+  document.body.appendChild(d);
+}
+function closeGovModal() { $("govModal")?.remove(); }
+
+function openSyllabus(enc) {
+  const name = decodeURIComponent(enc), ex = GOV_SYLLABUS[name]; if (!ex) return;
+  const subjects = ex.subjects.map(s => `<div class="syl-subject"><h3>${esc(s.name)}</h3><div>${s.topics.map(t=>`<span class="skill-tag">${esc(t)}</span>`).join("")}</div></div>`).join("");
+  openGovModal(`<div class="qz-top"><h2>📖 ${esc(name)} Syllabus</h2><button class="outline-button" onclick="closeGovModal()">✕ Close</button></div>
+    <p class="qz-count">${esc(ex.pattern)}</p>${subjects}
+    <p class="demo-note">${esc(GOV_NOTE)}</p>
+    <div class="cv-actions"><button class="main-button" onclick="openStudyPlan('${enc}')">🗓️ Make my study plan</button></div>`);
+}
+
+function openApply(enc) {
+  const name = decodeURIComponent(enc), a = GOV_APPLY[name]; if (!a) return;
+  const u = currentUser, saved = u.examCentres?.[name] || [], done = u.examApplied?.[name], docsDone = u.examDocs?.[name] || [];
+  const links = a.links.map(l=>`<a class="main-button" target="_blank" rel="noopener noreferrer" href="${esc(l.url)}">🌐 ${esc(l.label)}</a>`).join("");
+  const centreTitle = a.centreMode === "choose" ? "📍 Exam centre preference" : "📍 Exam centre";
+  const centreHelp = a.centreMode === "choose"
+    ? "Write your 3 preferred cities in order, so you are ready when you fill the official form."
+    : "Write the cities near you. This helps you choose the right RRB.";
+  const inputs = [0,1,2].map(i=>`<div class="centre-row"><span class="centre-no">${i+1}</span><input list="cityList" id="ec${i}" placeholder="${i===0?"Nearest city":"Backup city"}" value="${esc(saved[i]||"")}"><button class="outline-button" onclick="openCentreMap(${i})">🗺️ Maps</button></div>`).join("");
+  const docs = a.docs.map((d,i)=>`<label class="doc-row"><input type="checkbox" ${docsDone.includes(i)?"checked":""} onchange="toggleExamDoc('${enc}',${i},this.checked)"> ${esc(d)}</label>`).join("");
+  openGovModal(`<div class="qz-top"><h2>📝 Apply for ${esc(name)}</h2><button class="outline-button" onclick="closeGovModal()">✕ Close</button></div>
+    <p class="qz-count">Applications are made only on the official website. Check the latest notification for dates, fee and eligibility before you apply.</p>
+    <div class="cv-actions">${links}</div>
+    <h3>${centreTitle}</h3>
+    <p class="qz-count">${esc(a.centreNote)}</p><p class="qz-count">${esc(centreHelp)}</p>
+    ${inputs}<datalist id="cityList">${CITY_LIST.map(c=>`<option value="${esc(c)}">`).join("")}</datalist>
+    <div class="cv-actions"><button class="main-button" onclick="saveExamCentres('${enc}')">Save my centre choices</button></div>
+    <h3>Steps to apply</h3><ol class="apply-steps">${a.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>
+    <h3>Keep these ready</h3>${docs}
+    <div class="apply-done">${done?`<span class="badge green">✓ Marked as applied on ${esc(done)}</span> <button class="outline-button" onclick="markExamApplied('${enc}',false)">Undo</button>`:`<button class="success-button" onclick="markExamApplied('${enc}',true)">I have applied</button>`}</div>
+    <p class="demo-note">Never pay through third-party websites. Use only the official links above.</p>`);
+}
+
+function openCentreMap(i) {
+  const city = $("ec"+i)?.value.trim();
+  if (!city) return showMessage("Type a city first.");
+  window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("computer based exam centre in " + city), "_blank", "noopener");
+}
+function saveExamCentres(enc) {
+  const name = decodeURIComponent(enc);
+  currentUser.examCentres = currentUser.examCentres || {};
+  currentUser.examCentres[name] = [0,1,2].map(i=>$("ec"+i).value.trim());
+  saveUser(); showMessage("Centre choices saved.");
+}
+function toggleExamDoc(enc, i, on) {
+  const name = decodeURIComponent(enc);
+  currentUser.examDocs = currentUser.examDocs || {};
+  const set = new Set(currentUser.examDocs[name] || []);
+  on ? set.add(i) : set.delete(i);
+  currentUser.examDocs[name] = [...set]; saveUser();
+}
+function markExamApplied(enc, on) {
+  const name = decodeURIComponent(enc);
+  currentUser.examApplied = currentUser.examApplied || {};
+  if (on) currentUser.examApplied[name] = new Date().toLocaleDateString("en-IN"); else delete currentUser.examApplied[name];
+  saveUser(); renderGov(); openApply(enc);
+}
+
+let lastPlan = null;
+
+function openStudyPlan(enc) {
+  const name = decodeURIComponent(enc), ex = GOV_SYLLABUS[name]; if (!ex) return;
+  const saved = currentUser?.studyPlans?.[name] || {};
+  const levelOpts = sel => ["Weak","Average","Strong"].map(l=>`<option ${((sel||"Average")===l)?"selected":""}>${l}</option>`).join("");
+  const rows = ex.subjects.map((s,i)=>`<div class="plan-level"><span>${esc(s.name)}</span><select id="gpLvl${i}">${levelOpts(saved.levels?.[i])}</select></div>`).join("");
+  openGovModal(`<div class="qz-top"><h2>🗓️ ${esc(name)} Study Plan</h2><button class="outline-button" onclick="closeGovModal()">✕ Close</button></div>
+    <p class="qz-count">Tell us your time and how strong you are in each subject. Weak subjects get more time.</p>
+    <div class="two">
+      <div class="input-group"><label>Weeks until exam</label><input id="gpWeeks" type="number" min="2" max="52" value="${saved.weeks||12}"></div>
+      <div class="input-group"><label>Study hours per day</label><input id="gpHours" type="number" min="1" max="12" step="0.5" value="${saved.hours||3}"></div>
+    </div>
+    <h3>Your level in each subject</h3>${rows}
+    <div class="cv-actions"><button class="main-button" onclick="generateStudyPlan('${enc}')">Create My Plan</button></div>
+    <div id="gpResult"></div>`);
+  if (saved.weeks) generateStudyPlan(enc);
+}
+
+function buildStudyPlan(ex, weeks, hpd, levels) {
+  const rev = weeks >= 10 ? 2 : weeks >= 5 ? 1 : 0;
+  const S = weeks - rev, factor = {Weak:1.5, Average:1, Strong:0.6};
+  const subs = ex.subjects.map((s,i)=>({...s, level:levels[i], w:s.weight*(factor[levels[i]]||1)}));
+  const totalW = subs.reduce((a,s)=>a+s.w,0);
+  const weekHours = hpd*6;                       // 6 study days, 1 day for tests and rest
+  const study = [];
+  for (let wk=0; wk<S; wk++) {
+    const items = subs.map(s=>{
+      const n=s.topics.length, from=Math.floor(wk*n/S), to=Math.floor((wk+1)*n/S);
+      return {subject:s.name, hours:Math.max(0.5, Math.round(weekHours*s.w/totalW*2)/2), topics:s.topics.slice(from,to)};
+    });
+    study.push({week:wk+1, items, test: wk < S/2 ? "Day 7: sectional tests on this week's topics." : "Day 7: one full mock test, then review every mistake."});
+  }
+  const weakNames = subs.filter(s=>s.level==="Weak").map(s=>s.name);
+  const focus = (weakNames.length ? weakNames : subs.map(s=>s.name)).join(", ");
+  const revision = [];
+  for (let r=0; r<rev; r++) revision.push({week:S+r+1, text:`Revision week. Revise short notes and formulas. Focus on: ${focus}. Solve previous year papers and take a full mock test every 2 days.`});
+  return {study, revision, weekHours};
+}
+
+function generateStudyPlan(enc) {
+  const name = decodeURIComponent(enc), ex = GOV_SYLLABUS[name]; if (!ex) return;
+  const weeks = Math.min(52, Math.max(2, Math.round(Number($("gpWeeks").value)||12)));
+  const hpd = Math.min(12, Math.max(1, Number($("gpHours").value)||3));
+  const levels = ex.subjects.map((_,i)=>$("gpLvl"+i).value);
+  const plan = buildStudyPlan(ex, weeks, hpd, levels);
+  lastPlan = {name, weeks, hpd, levels, plan, tips:null};
+  currentUser.studyPlans = currentUser.studyPlans || {};
+  currentUser.studyPlans[name] = {weeks, hours:hpd, levels}; saveUser();
+
+  const weekCards = plan.study.map(w=>`<div class="plan-week"><h4>Week ${w.week}</h4>
+    ${w.items.map(i=>`<p><strong>${esc(i.subject)}</strong> · ${i.hours} h/week<br><span class="plan-topics">${i.topics.length ? esc(i.topics.join(", ")) : "Practice questions and previous year papers"}</span></p>`).join("")}
+    <p class="plan-test">${esc(w.test)}</p></div>`).join("")
+    + plan.revision.map(r=>`<div class="plan-week plan-rev"><h4>Week ${r.week}</h4><p>${esc(r.text)}</p></div>`).join("");
+  $("gpResult").innerHTML = `<h3>Your plan: ${weeks} weeks · ${hpd} h/day</h3>
+    <p class="qz-count">About ${plan.weekHours} study hours per week (6 days). Day 7 is for a test and rest.</p>
+    <div class="cv-actions"><button class="success-button" onclick="getStudyTips()">✨ Get AI tips</button><button class="outline-button" onclick="downloadStudyPlan()">⬇ Download</button></div>
+    <div id="gpTips"></div>${weekCards}<p class="demo-note">${esc(GOV_NOTE)}</p>`;
+}
+
+async function getStudyTips() {
+  if (!lastPlan) return;
+  const box = $("gpTips"); box.innerHTML = '<p class="qz-count">🧠 Preparing tips...</p>';
+  const ex = GOV_SYLLABUS[lastPlan.name], u = currentUser;
+  try {
+    const r = await callAI("studyplan",{
+      exam:lastPlan.name, weeks:lastPlan.weeks, hours:lastPlan.hpd,
+      weak:ex.subjects.filter((_,i)=>lastPlan.levels[i]==="Weak").map(s=>s.name),
+      strong:ex.subjects.filter((_,i)=>lastPlan.levels[i]==="Strong").map(s=>s.name),
+      education:u.education||[], skills:u.skills||[]
+    });
+    lastPlan.tips = r;
+    box.innerHTML = `<div class="settings-card"><p>${esc(r.strategy||"")}</p><ul>${(r.tips||[]).map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`;
+  } catch(e) { box.innerHTML = `<p class="qz-warn">${esc(/fetch|Failed/i.test(e.message)?"Cannot reach the server. Start server.js and try again.":e.message)}</p>`; }
+}
+
+function downloadStudyPlan() {
+  if (!lastPlan) return;
+  const L = [`${lastPlan.name} STUDY PLAN`, `${lastPlan.weeks} weeks · ${lastPlan.hpd} hours/day`, ""];
+  lastPlan.plan.study.forEach(w=>{
+    L.push(`WEEK ${w.week}`);
+    w.items.forEach(i=>L.push(`- ${i.subject} (${i.hours} h): ${i.topics.length ? i.topics.join(", ") : "Practice questions and previous year papers"}`));
+    L.push(w.test, "");
+  });
+  lastPlan.plan.revision.forEach(r=>L.push(`WEEK ${r.week}`, r.text, ""));
+  if (lastPlan.tips) { L.push("TIPS", lastPlan.tips.strategy||""); (lastPlan.tips.tips||[]).forEach(t=>L.push("- "+t)); L.push(""); }
+  L.push(GOV_NOTE);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([L.join("\n")],{type:"text/plain"}));
+  a.download = lastPlan.name.replace(/\s+/g,"_")+"_study_plan.txt"; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 
 function renderVerification() {
