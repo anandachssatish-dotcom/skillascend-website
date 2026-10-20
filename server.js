@@ -31,7 +31,7 @@ try {
 }
 
 const PORT = Number(process.env.PORT) || 3000;
-const KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+const KEY = String(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "").trim();
 const VOYAGE = process.env.VOYAGE_API_KEY;
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite";
 const EMBED_MODEL = process.env.VOYAGE_MODEL || "voyage-3.5";
@@ -53,20 +53,31 @@ function parseJSON(raw) {
   }
 }
 
+let authQuery = false; // false = key in header, true = key in URL
+function geminiFetch(body) {
+  const base = "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(MODEL) + ":generateContent";
+  const headers = { "content-type": "application/json" };
+  let url = base;
+  if (authQuery) url += "?key=" + encodeURIComponent(KEY); else headers["x-goog-api-key"] = KEY;
+  return fetch(url, { method: "POST", headers, signal: AbortSignal.timeout(30000), body });
+}
+
 // Calls Gemini with a timeout and up to 3 tries (handles busy server / bad JSON).
 async function ask(prompt, max = 2000) {
   let lastErr;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(MODEL) + ":generateContent", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-goog-api-key": KEY },
-        signal: AbortSignal.timeout(30000),
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: max, temperature: 0.3, responseMimeType: "application/json" }
-        })
+      const payload = JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: max, temperature: 0.3, responseMimeType: "application/json" }
       });
+      let r = await geminiFetch(payload);
+      // Some keys (new "AQ." keys) may only work one way: try the other way once.
+      if (r.status === 401 || r.status === 403) {
+        authQuery = !authQuery;
+        const r2 = await geminiFetch(payload);
+        if (r2.ok) r = r2; else authQuery = !authQuery;
+      }
       const j = await r.json().catch(() => ({}));
       if (!r.ok) {
         const err = new Error("Gemini error " + r.status + ": " + (j.error?.message || "request failed"));
