@@ -293,20 +293,66 @@ function renderCourses() {
     </div>`).join("");
 }
 
+function jobStatus(job) {
+  const verifiedList = currentUser?.verifiedSkillList || [];
+  const pending = job.skills.filter(s => !hasSkill(verifiedList, s));
+  return { pending, ready: pending.length === 0 };
+}
+
+function findJob(enc) {
+  const title = decodeURIComponent(enc);
+  return JOBS.find(j => j.title === title);
+}
+
+// Learn: open Courses, filtered to the first skill that is not verified yet.
+function learnForJob(enc) {
+  const job = findJob(enc); if (!job) return;
+  const { pending } = jobStatus(job);
+  showPage("courses");
+  const box = $("courseSearch");
+  if (box) { box.value = pending[0] || ""; renderCourses(); }
+  showMessage(pending.length ? "Learn " + pending.join(", ") + ", then verify it to unlock Apply." : "All skills for this job are verified.");
+}
+
+function applyJob(enc) {
+  const job = findJob(enc); if (!job) return;
+  const { pending, ready } = jobStatus(job);
+  if (!ready) return showMessage("Verify these skills first: " + pending.join(", "));
+  currentUser.appliedJobs = currentUser.appliedJobs || [];
+  const key = job.title + "|" + job.location;
+  if (!currentUser.appliedJobs.includes(key)) currentUser.appliedJobs.push(key);
+  saveUser(); renderJobs();
+  showMessage("Applied for " + job.title + ". (Demo: connect a real job API later.)");
+}
+
 function renderJobs() {
   const location=(currentUser?.location||"").trim()||"India";
   JOBS=buildLocationJobs(location);
   const q=($ ("jobSearch")?.value||"").toLowerCase().trim();
-  const skills=currentUser?.skills||[];
+  const verifiedList=currentUser?.verifiedSkillList||[];
+  const applied=currentUser?.appliedJobs||[];
   const data=JOBS.filter(j=>!q||(j.title+" "+j.company+" "+j.location+" "+j.skills.join(" ")).toLowerCase().includes(q))
-    .map(j=>({...j,match:j.skills.filter(s=>hasSkill(skills,s)).length}))
-    .sort((a,b)=>b.match-a.match);
+    .map(j=>({...j,verifiedCount:j.skills.filter(s=>hasSkill(verifiedList,s)).length,match:j.skills.filter(s=>hasSkill(currentUser?.skills||[],s)).length}))
+    .sort((a,b)=>(b.verifiedCount/b.skills.length-a.verifiedCount/a.skills.length)||(b.match-a.match));
   const count=$("jobCount"); if(count) count.textContent=`${data.length}+ jobs found`;
   const lt=$("jobLocationText"); if(lt) lt.textContent=`Showing jobs based on your CV location: ${location}`;
-  $("jobList").innerHTML=data.map(j=>`
-    <div class="job-card"><div><h2>${esc(j.title)}</h2><p>${esc(j.company)} · ${esc(j.location)}</p>
-    <div class="job-meta"><span>Skill match: ${j.skills.length?Math.round(j.match/j.skills.length*100):0}%</span><span>Stability: ${esc(j.stability)}</span><span>Employer trust: ${j.trust}/100</span></div></div>
-    <button class="success-button" onclick="showMessage('Demo: application flow can be connected to a real job API later.')">Apply</button></div>`).join("")||"<div class='settings-card'>No jobs found.</div>";
+  $("jobList").innerHTML=data.map(j=>{
+    const { pending, ready } = jobStatus(j);
+    const enc = encodeURIComponent(j.title);
+    const done = applied.includes(j.title+"|"+j.location);
+    const chips = j.skills.map(s => hasSkill(verifiedList,s)
+      ? `<span class="job-skill ok">✓ ${esc(s)}</span>`
+      : `<span class="job-skill">${esc(s)}</span>`).join("");
+    const applyBtn = done
+      ? `<button class="outline-button" disabled>✓ Applied</button>`
+      : ready
+        ? `<button class="success-button" onclick="applyJob('${enc}')">Apply</button>`
+        : `<button class="success-button" disabled title="Verify all required skills to apply">🔒 Apply</button>`;
+    return `<div class="job-card"><div><h2>${esc(j.title)}</h2><p>${esc(j.company)} · ${esc(j.location)}</p>
+    <div class="job-skills"><span class="job-skills-label">Skills required:</span>${chips}</div>
+    ${ready ? "" : `<p class="job-hint">Verify to unlock Apply: ${esc(pending.join(", "))}</p>`}</div>
+    <div class="job-actions"><button class="main-button" onclick="learnForJob('${enc}')">📚 Learn</button>${applyBtn}</div></div>`;
+  }).join("")||"<div class='settings-card'>No jobs found.</div>";
 }
 
 function renderGov() {
@@ -333,11 +379,22 @@ function renderVerification() {
   paintTrust();
 }
 
-async function callAI(task,data) {
-  const r = await fetch(API_BASE, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task,data})});
-  const j = await r.json().catch(()=>({}));
-  if (!r.ok || j.error) throw new Error(j.error || "AI server error");
-  return j;
+async function callAI(task,data,tries=2) {
+  let lastErr;
+  for (let i=0;i<tries;i++) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(()=>ctrl.abort(), 45000);
+    try {
+      const r = await fetch(API_BASE, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task,data}),signal:ctrl.signal});
+      const j = await r.json().catch(()=>({}));
+      if (!r.ok || j.error) throw new Error(j.error || "AI server error");
+      return j;
+    } catch(e) {
+      lastErr = e.name==="AbortError" ? new Error("AI took too long. Try again.") : e;
+      if (i < tries-1) await new Promise(res=>setTimeout(res,800));
+    } finally { clearTimeout(timer); }
+  }
+  throw lastErr;
 }
 async function askAI(task,data){ return callAI(task,data); }
 
@@ -442,27 +499,37 @@ async function renderGapResult() {
   $("gapResult").innerHTML = `<div class="settings-card gap-card"><h2>🎯 Your Skill Gap</h2><p>${esc(advice)}</p><p><strong>Next steps:</strong></p><ol>${plan.map(x=>`<li>${esc(x)}</li>`).join("")}</ol><p>Missing: <strong>${esc(missing.join(", ") || "None")}</strong></p></div>`;
 }
 
+let cvBusy = false;
 async function improveCVWithAI() {
+  if (cvBusy) return;
   const text = $("voiceText").value.trim();
   if (!text) return showMessage("Speak or type something first.");
+  cvBusy = true;
   $("aiStatus").textContent = "🧠 AI is preparing your CV...";
   try {
-    const r = await askAI("cv",{text,goal:currentUser.careerGoal,skills:currentUser.skills,knownSkills:SKILLS});
-    currentUser.summary = r.summary || currentUser.summary;
-    currentUser.skills = (r.skills || currentUser.skills).map(normalizeSkill);
-    currentUser.education = r.education || currentUser.education;
-    currentUser.experience = r.experience || currentUser.experience;
-    currentUser.projects = r.projects || currentUser.projects;
-    currentUser.certifications = r.certifications || currentUser.certifications;
-    currentUser.languages = r.languages || currentUser.languages;
-    currentUser.hobbies = r.hobbies || currentUser.hobbies;
+    const u = currentUser;
+    const r = await callAI("cv",{
+      text, goal:u.careerGoal, skills:u.skills, knownSkills:SKILLS,
+      current:{summary:u.summary,education:u.education,experience:u.experience,projects:u.projects,certifications:u.certifications,languages:u.languages,hobbies:u.hobbies}
+    });
+    // Keep old data if AI returns an empty list for a field.
+    const keep = (n,o) => (Array.isArray(n) && n.length) ? n : (o || []);
+    u.summary = r.summary || u.summary;
+    const skills = keep(r.skills,u.skills).map(normalizeSkill);
+    u.skills = skills.filter((s,i)=>s && skills.findIndex(x=>String(x).toLowerCase()===String(s).toLowerCase())===i);
+    u.education = keep(r.education,u.education);
+    u.experience = keep(r.experience,u.experience);
+    u.projects = keep(r.projects,u.projects);
+    u.certifications = keep(r.certifications,u.certifications);
+    u.languages = keep(r.languages,u.languages);
+    u.hobbies = keep(r.hobbies,u.hobbies);
     saveUser(); updateUserUI(); updateCVPreview(); updateDashboard();
     $("aiStatus").textContent = "✓ CV updated";
     showMessage("AI updated your CV.");
   } catch(e) {
     $("aiStatus").textContent = "AI unavailable";
-    showMessage("Start server.js and try again.");
-  }
+    showMessage(/fetch|Failed|network/i.test(e.message) ? "Cannot reach the server. Start server.js and try again." : e.message);
+  } finally { cvBusy = false; }
 }
 
 function updateCVPreview() {
@@ -488,30 +555,85 @@ function saveProfile() {
   showMessage("Profile saved.");
 }
 
+function setVoiceUI(on) {
+  const btn=$("voiceButton"), box=$("voiceText");
+  btn.textContent = on ? "⏹ Stop & Create CV" : "🎙️ Speak";
+  btn.classList.toggle("recording", on);
+  box.readOnly = on;                 // stops edits fighting with live speech
+  $("voiceLang").disabled = on;
+}
+
+function stopVoice() {
+  listening = false;
+  try { recognition.stop(); } catch {}
+}
+
 function startVoice() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const status=$("voiceStatus"), box=$("voiceText"), btn=$("voiceButton");
+  const status=$("voiceStatus"), box=$("voiceText");
   if (!SR) return status.textContent="Voice needs Chrome or Edge. Or type below.";
-  if (listening) { listening=false; try{recognition.stop()}catch{}; return; }
-  recognition = new SR();
-  recognition.lang=$("voiceLang").value; recognition.continuous=true; recognition.interimResults=true;
-  let finalText=box.value.trim();
-  recognition.onresult=e=>{
-    let interim="";
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      const t=e.results[i][0].transcript;
-      if(e.results[i].isFinal) finalText += (finalText?" ":"")+t;
-      else interim += t;
-    }
-    box.value=finalText+(interim?" "+interim:"");
+  if (listening) return stopVoice();
+  if (cvBusy) return;
+
+  let fastFails = 0, netFails = 0, startedAt = 0, errored = false;
+
+  const finish = () => {
+    listening = false; setVoiceUI(false);
+    box.value = box.value.replace(/\s+/g," ").trim();
+    if (box.value) { status.textContent="🧠 Analysing..."; improveCVWithAI(); }
+    else if (!errored) status.textContent="No speech heard. Check your microphone and try again.";
   };
-  recognition.onerror=e=>{ if(e.error!=="no-speech") status.textContent="Voice error: "+e.error; };
-  recognition.onend=()=>{
-    if(listening){try{recognition.start();return}catch{}}
-    btn.textContent="🎙️ Speak";btn.classList.remove("recording");
-    if(box.value.trim()){status.textContent="🧠 Analysing...";improveCVWithAI()}else status.textContent="Voice input ready";
+
+  const begin = () => {
+    const base = box.value.trim();   // everything captured before this session
+    recognition = new SR();
+    recognition.lang = $("voiceLang").value;
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    // Rebuild from ALL results of this session each time (avoids duplicated words on some phones).
+    recognition.onresult = e => {
+      let fin="", interim="";
+      for (let i=0;i<e.results.length;i++) {
+        const t = e.results[i][0].transcript.trim();
+        if (e.results[i].isFinal) fin += " "+t; else interim += " "+t;
+      }
+      netFails = 0;
+      box.value = (base+" "+fin+" "+interim).replace(/\s+/g," ").trim();
+    };
+
+    recognition.onerror = e => {
+      if (e.error==="no-speech" || e.error==="aborted") return;
+      if (e.error==="network" && ++netFails < 3) return;   // try again quietly
+      const msgs = {
+        "not-allowed":"Microphone is blocked. Allow the mic in the browser address bar.",
+        "service-not-allowed":"Microphone is blocked. Allow the mic in the browser address bar.",
+        "audio-capture":"No microphone found.",
+        "language-not-supported":"This language is not supported by your browser.",
+        "network":"Voice needs internet. Check your connection."
+      };
+      status.textContent = msgs[e.error] || "Voice error: "+e.error;
+      errored = true; listening = false;
+    };
+
+    recognition.onend = () => {
+      if (listening) {
+        // The browser ends the session after silence. Restart, but stop if it keeps failing at once.
+        fastFails = (Date.now()-startedAt < 1500) ? fastFails+1 : 0;
+        if (fastFails < 4) return setTimeout(()=>{ if (listening) { try { begin(); } catch { finish(); } } }, 250);
+        listening = false;
+      }
+      finish();
+    };
+
+    startedAt = Date.now();
+    recognition.start();
   };
-  recognition.start(); listening=true; btn.textContent="⏹ Stop & Create CV";btn.classList.add("recording");status.textContent="🔴 Recording...";
+
+  listening = true; setVoiceUI(true);
+  status.textContent = "🔴 Listening... speak clearly, then press Stop.";
+  try { begin(); } catch { listening=false; setVoiceUI(false); status.textContent="Could not start the microphone."; }
 }
 
 function videoLink(skill,channel){return YT+encodeURIComponent(skill+" tutorial "+(channel||""));}
